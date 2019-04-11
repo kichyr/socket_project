@@ -4,7 +4,7 @@
 #include <future>
 #include <functional>
 
-#include <clientSock.h>
+#include "clientSock.h"
 
 #include <errno.h>
 #include <string.h>
@@ -46,7 +46,7 @@ class serverSock {
     int sockfd;//start server to listen for clients to send them ids
     socklen_t clilen;
     struct sockaddr_in servaddr, cliaddr;
-    static const unsigned int buffSize = 1000;
+    static const unsigned int buffSize = 1024;
     char mesg[buffSize];
 
     unsigned int listeningPort;

@@ -1,0 +1,16 @@
+all: utest_server
+
+utest_server: serverSock.o test1_server.o clientSock.o
+	g++ clientSock.o serverSock.o test1_server.o -o utest_server -pthread
+
+test1_server.o: test1_server.cpp
+	g++ -c test1_server.cpp -o test1_server.o
+
+serverSock.o: serverSock.cpp
+	g++ -c serverSock.cpp -o serverSock.o
+
+clientSock.o: clientSock.cpp
+	g++ -c clientSock.cpp -o clientSock.o
+
+clean:
+	rm -rf *.o utest *.gcno *.gcda *.gcov
