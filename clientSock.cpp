@@ -52,6 +52,8 @@ int clientSock::connect(string host, unsigned int port) {
     return 1;
 }
 
+
+//Говно
 bool clientSock::hasError() {
     if(sockfd == -1)
         return true;
@@ -66,6 +68,7 @@ bool clientSock::hasError() {
         return false;
 }
 
+//Хезе что это
 int clientSock::enable_keepalive(int sock) {
     int yes = 1;
 

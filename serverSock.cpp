@@ -64,19 +64,18 @@ int serverSock::enable_keepalive(int sock) {
     return 0;
 }
 
-clientSock serverSock::accept() {
+void serverSock::accept_data(std::function<void(int sock)> fn) {
     if(started) {
         int newsockfd = ::accept(sockfd, (struct sockaddr*) &cliaddr, &clilen);
 
         if(newsockfd == -1)
             cerr << errno << "  " << strerror(errno) << endl;
 
-        return clientSock(newsockfd);
+        this->run(fn, newsockfd);
     }
-    else return clientSock();
 }
 
-int serverSock::start() {
+int serverSock::start(std::function<void(int sock)> fn) {
     if(listeningPort == 0) {
         cerr << "ERROR No port defined to listen to" << endl;
         return 1;
@@ -93,21 +92,19 @@ int serverSock::start() {
     started = true;
     stopSock = false;
 
+    while(!stopSock){
+        this->accept_data(fn);
+    }
+
     return 0;
 }
 
-int serverSock::run(std::function<void(serverSock* sock)> fn) {
-    thr = std::async([this, fn]() {
-        while(!stopSock)
-            fn(this);
+int serverSock::run(std::function<void(int sock)> fn, int newsocket) {
+    auto fut = std::async(std::launch::async, [fn, newsocket](){
+        fn(newsocket);
     });
-    return 0;
-}
-
-int serverSock::runBlocking(std::function<void(serverSock* sock)> fn) {
-    while(!stopSock)
-        fn(this);
-
+    cout << " lol ";
+    flush(std::cout);
     return 0;
 }
 

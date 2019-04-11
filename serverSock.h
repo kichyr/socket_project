@@ -27,14 +27,13 @@ class serverSock {
     serverSock();
     ~serverSock();
 
-    clientSock accept();
+    void accept_data(std::function<void(int sock)> fn);
 
     bool inited;
 
     int init(unsigned int port);//!<Necessary only if not already done by using constructor with port
-    int start();
-    int run(std::function<void(serverSock* sock)> fn);
-    int runBlocking(std::function<void(serverSock* sock)> fn);
+    int start(std::function<void(int sock)> fn);
+    int run(std::function<void(int sock)> fn, int newsocket);
     int stop();
 
   protected:
