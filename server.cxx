@@ -11,19 +11,35 @@
 using namespace std;
 
 void send_echo(unsigned int ip, int port) {
-	int sender = socket(AF_INET, SOCK_STREAM, 0);;
+	int sender = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in serv, servaddr;
+    bzero(&serv, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(53000);
+
+    serv.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    if(bind(sender, (struct sockaddr *)&serv, sizeof(serv)) < 0)
+
 	struct sockaddr_in servaddr;
 	//структура для адреса сервера
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = (port);
     servaddr.sin_addr.s_addr =  (ip);
-    
+    sleep(10);
 	
-	connect(sender, (struct sockaddr *)&servaddr, sizeof(servaddr));
+	//connect(sender, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    char buff[5] = {'a', 'a', 'a', 'a', 'a'};
+	//write(sender, "sosi", 4);
+    //sendto(sender, buff, 5, 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+	
+    if(connect(sender, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+    {
+        perror("connect");
+        exit(3);
+    }
+    write(sender, buff, 5);
 
-	write(sender, "sosi", 4);
-	
 	close(sender);
 }
 
@@ -53,15 +69,16 @@ int main()
         close(listener);
         exit(2);
     }
-    if(listen(listener, 100) < 0){
+        if(listen(listener, 100) < 0){
 		perror("listen");
 		close(listener);
 		exit(3);
-	}
-    
+	} 
+    char buff[1024];
     while(1)
     {
 		clilen = sizeof(cliaddr);
+        //recvfrom(listener, buff, 1024, 0)
         if((sock = accept(listener, (struct sockaddr *) &cliaddr, &clilen)) < 0){
 			perror("accept");
 			close(listener);

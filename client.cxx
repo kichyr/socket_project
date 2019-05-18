@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <iostream>
+#include <sys/socket.h>
 using namespace std;
 
 //char message[] = "hello there!\n";
@@ -22,6 +23,7 @@ int main(int argc, char **argv)
     int read_b;
     //char * peername;
     //char buf[100];
+
     if(argc != 2) {
 		printf("Usage: a.out <IP adress>\n");
 		exit(1);
@@ -32,40 +34,105 @@ int main(int argc, char **argv)
     //addr.sin_addr.s_addr = htonl(localhost);
 	inet_aton(argv[1], &addr.sin_addr);
     serv.sin_family = AF_INET;
-    serv.sin_port = htons(52002);
+    serv.sin_port = htons(52004);
     addr.sin_family = AF_INET;
     addr.sin_port = htons(51000); // или любой другой порт...
-    serv.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    serv.sin_addr.s_addr = htonl(INADDR_ANY);
+    
+    int enable = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int));
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+ 
+
     if(bind(sock, (struct sockaddr *)&serv, sizeof(serv)) < 0)
     {
         perror("bind");
         close(sock);
         exit(2);
     }
-    
+
+
+
+    cout << "kok-----------------------------------" << endl;
+    fflush(stdout);
     
     if(connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
         perror("connect");
         exit(3);
     }
-    printf("Message => ");
-    while((read_b = read(1, sendline, 1023)) > 0){
-		send(sock, sendline, read_b, 0);
-		if(read_b < 1023){
-			break;
-		}
+    cout << "kok-----------------------------------" << endl;
+    fflush(stdout);
+    shutdown(sock, SHUT_RDWR);
+    close(sock);
+
+    //получаем ответ от сервера
+    struct sockaddr_in servaddr;
+	//структура для адреса сервера
+    bzero(&servaddr, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(52004);
+    servaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    //////////////////////////////
+    int rcv_sock = socket(AF_INET, SOCK_STREAM, 0);
+    
+    enable = 1;
+    setsockopt(rcv_sock, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int));
+    setsockopt(rcv_sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+
+    if(bind(rcv_sock, (struct sockaddr *)&serv, sizeof(serv)) < 0)
+    {
+        perror("bind");
+        close(sock);
+        exit(2);
+    }
+
+    int bytes_read;
+    if(listen(rcv_sock, 100) < 0){
+		perror("listen");
+		close(rcv_sock);
+		exit(3);
 	}
-	if(listen(sock, 100) < 0){
+    char buf[1024];
+    while(1)
+    {
+		socklen_t clilen = sizeof(addr);
+        //recvfrom(listener, buff, 1024, 0)
+        if((sock = accept(rcv_sock, (struct sockaddr *) &addr, &clilen)) < 0){
+			perror("accept");
+			//close(addr);
+			exit(4);
+		}
+		//peername = getpeername(listener, (struct sockaddr *) &cliaddr, &clilen
+		//char *peername = inet_ntoa(addr.sin_addr);
+		//cout << peername << endl;
+        while((bytes_read = read(sock, buf, 1023)) > 0){
+			printf("%s", buf);
+			if(bytes_read < 1023){
+				break;
+			}
+		}
+		cout << endl;
+		//send_echo(cliaddr.sin_addr.s_addr, cliaddr.sin_port);
+        //lose(sock);
+		//cout << endl << cliaddr << endl;
+        bzero(&buf, bytes_read);
+    }
+    //recv(rcv_sock, *buf, 1024, 5);
+    //recvfrom(rcv_sock, *buf, 5, MSG_WAITALL, (struct sockaddr *)&servaddr, &len);
+    //printf("%s", buff);
+	/* if(listen(sock, 100) < 0){
 		perror("listen");
 		close(sock);
 		exit(3);
 	}
 	socklen_t clilen;
 	struct sockaddr_in cliaddr;
-	sock = accept(sock, (struct sockaddr *) &cliaddr, &clilen);
+    clilen = sizeof(cliaddr);
+    int listen = socket(AF_INET, SOCK_STREAM, 0);;
+	sock = accept(listen, (struct sockaddr *) &cliaddr, &clilen);
 	read(sock, buff, 100);
-	cout << buff;
+	cout << buff; */
 //создаем TCP сокет
 	/*int bytes_read;
 	socklen_t clilen;
@@ -78,8 +145,8 @@ int main(int argc, char **argv)
     
     while(1)
     {
-		clilen = sizeof(cliaddr);
         if((sock = accept(sock, (struct sockaddr *) &cliaddr, &clilen)) < 0){
+		clilen = sizeof(cliaddr);
 			perror("accept");
 			close(sock);
 			exit(4);
@@ -98,6 +165,5 @@ int main(int argc, char **argv)
 		//cout << endl << cliaddr << endl;
         //bzero(&buf, bytes_read);
     }*/
-    
     return 0;
 }
