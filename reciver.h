@@ -17,16 +17,18 @@
 #include <unistd.h>
 #include <vector>
 
-#define NUM_THREADS 10
+//TO FIX
+#define NUM_THREADS 5
 #define MESS_SIZE 4096
-
-
 
 
 class reciver {
 	public:
 		reciver(unsigned int port);
 		~reciver();
+		
+		//Возврвщвет true, если сервер работает
+		bool isAlive();
 		
 		//зпринимаем данные, они омеют формат //тип сообщения//номер_сообщения(файл)////
 		void accept_data(std::function<void(int sock, reciver* r)> fn);
@@ -38,6 +40,9 @@ class reciver {
 		std::vector<std::string> rcv_short_mess;
 		void start();
 
+
+		void set_in_addr(in_addr_t _in_addr);
+
 	protected:
 		std::vector<std::future<void>> fut; // массив осинхронных потоков
 
@@ -47,15 +52,12 @@ class reciver {
 		socklen_t clilen;
 		struct sockaddr_in servaddr, cliaddr;
 		static const unsigned int buffSize = 1024;
-		
+		in_addr_t in_addr = INADDR_ANY;
 
 		unsigned int listeningPort;
 		bool started;
-		bool stopSock;
-
-		
+		bool stopSock;	
 };
-
 
 //0 - короткое сообщение, 1 - файл
 	void recive(int socket, reciver* r);
