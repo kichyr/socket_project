@@ -24,6 +24,7 @@
 //TO FIX
 #define MESS_SIZE 4096
 
+namespace project {
 class sender {
     public:
         // iP в виде строки, порт ресивера, есть ли сокет сообщений, кол-во сокетов в cоединении без учета сокета-сообщений
@@ -56,4 +57,5 @@ class sender {
         std::vector<int> sockets;
         //std::mutex m;
 };
+}
 #endif // CLIENTSOCK_H

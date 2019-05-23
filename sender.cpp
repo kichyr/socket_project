@@ -1,17 +1,17 @@
 #include "sender.h"
 
-sender::sender(bool _is_msg_socket, int _num_sockets) {
+project::sender::sender(bool _is_msg_socket, int _num_sockets) {
     is_msg_socket = _is_msg_socket;
     num_sockets = _num_sockets;
     sockets.resize(num_sockets);
     fut.resize(num_sockets);
 }
 
-sender::~sender() {
+project::sender::~sender() {
     disconnect_all();
 }
 
-void sender::connect_all(std::string _host, int _reciver_port) {
+void project::sender::connect_all(std::string _host, int _reciver_port) {
     host = _host;
     reciver_port = _reciver_port;
 
@@ -33,7 +33,7 @@ void sender::connect_all(std::string _host, int _reciver_port) {
     }
 }
 
-void sender::connect(int *sockfd, int port) {
+void project::sender::connect(int *sockfd, int port) {
     struct sockaddr_in servaddr;
     struct hostent* server;
 
@@ -49,18 +49,18 @@ void sender::connect(int *sockfd, int port) {
         throw "can't connect to host";
 }
 
-void sender::disconnect_all() {
+void project::sender::disconnect_all() {
     for(auto socket : sockets)
         disconnect(socket);
     if(is_msg_socket)
         disconnect(mess_sock);
 }
 
-void sender::disconnect(int sockfd) {
+void project::sender::disconnect(int sockfd) {
     close(sockfd);
 }
 
-void sender::send_short_msg(std::string msg) {
+void project::sender::send_short_msg(std::string msg) {
     int sended;
     char ok;
     if((sended = write(mess_sock, &counter_of_short_msg, 2)) < 0)
@@ -102,7 +102,7 @@ void send_peace_of_file(int socket, int start_p, int step, synchronized_file_rea
     
 }
 
-void sender::send_file(std::string path) {
+void project::sender::send_file(std::string path) {
     synchronized_file_reader reader(path);
     int step_for_one_socket = ceil(ceil(reader.get_file_lenght() / MESS_SIZE) / num_sockets);
     synchronized_file_reader* reader_ptr = &reader;

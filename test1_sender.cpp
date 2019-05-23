@@ -1,6 +1,6 @@
 #include"sender.h"
 #include<vector>
-
+using namespace project;
 int main() {
     sender send1(true, 4);
     try{
