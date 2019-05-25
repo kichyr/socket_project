@@ -45,7 +45,7 @@ public:
     QGroupBox *groupBox_2;
     QPushButton *but_send;
     QLineEdit *message;
-    QPushButton *recieve;
+    QPushButton *AddFile;
     QPushButton *entName;
     QLineEdit *name;
 
@@ -130,9 +130,9 @@ public:
         message = new QLineEdit(groupBox_2);
         message->setObjectName(QStringLiteral("message"));
         message->setGeometry(QRect(0, 10, 461, 101));
-        recieve = new QPushButton(groupBox_2);
-        recieve->setObjectName(QStringLiteral("recieve"));
-        recieve->setGeometry(QRect(100, 110, 99, 27));
+        AddFile = new QPushButton(groupBox_2);
+        AddFile->setObjectName(QStringLiteral("AddFile"));
+        AddFile->setGeometry(QRect(100, 110, 99, 27));
         entName = new QPushButton(groupBox_2);
         entName->setObjectName(QStringLiteral("entName"));
         entName->setGeometry(QRect(360, 110, 99, 27));
@@ -155,7 +155,7 @@ public:
         but_connect->setText(QApplication::translate("dialog", "Connect", 0));
         groupBox_2->setTitle(QString());
         but_send->setText(QApplication::translate("dialog", "Send", 0));
-        recieve->setText(QApplication::translate("dialog", "recive", 0));
+        AddFile->setText(QApplication::translate("dialog", "AddFile", 0));
         entName->setText(QApplication::translate("dialog", "EnerName", 0));
     } // retranslateUi
 

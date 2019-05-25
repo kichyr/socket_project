@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QtGui>
 #include <QMessageBox>
+#include <QFileDialog>
 using namespace std;
 /*
 std::ostream&  operator <<(std::ostream &stream,const QString &str)
@@ -21,7 +22,7 @@ dialog::dialog(QWidget *parent) :
     ui(new Ui::dialog)
 {
     ui->setupUi(this);
-    test_reciver.init(50065);
+    test_reciver.init(50069);
     send1.init(true, 0);
     reciver* test_reciver_ptr = &test_reciver;
     recive_listener = std::async(std::launch::async, [this, test_reciver_ptr](){
@@ -93,6 +94,9 @@ void dialog::on_but_send_clicked()
     string text1 = text.toUtf8().constData();
     text = u_name + " : " + text;
     //std::T << text.toUtf8().constData();
+    if(u_name.isEmpty()){
+        return;
+    }
     send1.send_short_msg(text1);
     //string s = test_reciver.rcv_short_mess();
     ui->log->insertItem(0, text);
@@ -102,19 +106,14 @@ void dialog::on_but_send_clicked()
 }
 
 
-
-void dialog::on_recieve_clicked()
-{
-    QString s = QString::fromStdString(test_reciver.rcv_short_mess.back());
-    s = "pen pal : " + s;
-    ui->log->insertItem(0,s);
-    ui->log->item(0)->setTextColor(Qt::blue);
-    //ui->log->append(s);
-    //test_reciver.rcv_short_mess();
-}
-
 void dialog::on_entName_clicked()
 {
     u_name = ui->name->text();
     //u_name = str.toUtf8().constData();
+}
+
+void dialog::on_AddFile_clicked()
+{
+    path = QFileDialog::getOpenFileName(0,QObject::tr("Chose file"),QDir::homePath(), QObject::tr("Все файлы (*.*)"));
+    ui->log->insertItem(0, path);
 }

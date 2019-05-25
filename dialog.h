@@ -21,6 +21,7 @@ public:
     project1::sender send1;
     QString u_name;
     reciver test_reciver;
+    QString path;
     friend void print(dialog* d, reciver* test_reciver);
 
 private slots:
@@ -31,6 +32,8 @@ private slots:
     void on_recieve_clicked();
 
     void on_entName_clicked();
+
+    void on_AddFile_clicked();
 
 private:
     std::future<void> recive_listener;

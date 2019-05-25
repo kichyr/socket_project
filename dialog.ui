@@ -131,7 +131,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="recieve">
+   <widget class="QPushButton" name="AddFile">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -141,7 +141,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>recive</string>
+     <string>AddFile</string>
     </property>
    </widget>
    <widget class="QPushButton" name="entName">
