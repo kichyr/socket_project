@@ -6,7 +6,7 @@
 using namespace std;
 template <typename T> 
 ostream& operator<<(ostream& os, const vector<T>& v) 
-{ 
+{
     os << "["; 
     for (int i = 0; i < v.size(); ++i) { 
         os << v[i]; 
@@ -17,15 +17,20 @@ ostream& operator<<(ostream& os, const vector<T>& v)
     return os; 
 } 
 //
-
+reciver test_reciver;
 void* recive_thread(reciver* t_reciver) {
         (*t_reciver).start();
 }
 
+void handler(int a){
+    delete[]&test_reciver;
+    exit(0);
+}
 
 int main() {
-    reciver test_reciver(50055);
+    test_reciver.init(50063);
     test_reciver.set_in_addr(INADDR_LOOPBACK);
+    signal(SIGINT, handler);
     std::thread thread_obj(recive_thread, &test_reciver);
     while(true) {
         sleep(5);

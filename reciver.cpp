@@ -1,6 +1,7 @@
 #include "reciver.h"
 
-reciver::reciver(unsigned int port) : stopSock(false) {
+void reciver::init(unsigned int port) {
+    stopSock = false;
     listeningPort = port;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     bzero(&servaddr, sizeof(servaddr));
@@ -43,7 +44,7 @@ void reciver::start() {
     started = true;
     stopSock = false;
 
-    while(!stopSock)
+    while(isAlive())
         this->accept_data(recive);
 }
 
@@ -73,7 +74,42 @@ void recive(int socket, reciver* r) {
 }
 
 void recive_file(int socket, reciver* r){
-
+    char msg[100];
+    int p, recived; //position
+    char next = 1;
+    int state = 0;
+    while(r->isAlive()) {
+        //принимаем название файла
+        if(r->reciving_file_flag == 0)
+            state = 0;
+        if(r->reciving_file_flag == 0) {
+            //r->mutex_to_send_file_name.lock();
+                if(r->reciving_file_flag == 0) {
+                recived = recv(socket, msg, 100, 0);
+                r->writer.init_new_file(msg);
+                r->reciving_file_flag++;
+                write(socket, &next, 1);
+                //std::cout << "ok";
+            }
+            //r->mutex_to_send_file_name.unlock();
+        }
+        if(r->reciving_file_flag > 0 && state == 0)
+            state = 1;
+        //принимаем куски файлов
+        else if(state == 1){
+            recv(socket, &p, 4, 0);
+            std::cout << p << std::endl;
+            if(p != -1) {
+                recived = recv(socket, msg, 100, 0);
+                write(socket, &next, 1);
+                std::cout << msg;
+                r->writer.write(p, msg, recived);
+            }
+            else {
+                state = 2;
+            }
+        }
+    }
 }
 
 void recive_short_mess(int socket, reciver* r) {
@@ -89,10 +125,10 @@ void recive_short_mess(int socket, reciver* r) {
         msg[bytes_read] = '\0';
         r->rcv_short_mess.push_back(msg);
         //std::cout << num_msg << " " << bytes_read << " " << msg << std::endl;
-        send(socket, &next, 1, 0);
+        write(socket, &next, 1);
         //fflush(stdout);
     }
- }
+}
 
 int reciver::stop() {
     stopSock = true;

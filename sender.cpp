@@ -1,17 +1,17 @@
 #include "sender.h"
 
-project::sender::sender(bool _is_msg_socket, int _num_sockets) {
+void project1::sender::init(bool _is_msg_socket, int _num_sockets) {
     is_msg_socket = _is_msg_socket;
     num_sockets = _num_sockets;
     sockets.resize(num_sockets);
     fut.resize(num_sockets);
 }
 
-project::sender::~sender() {
+project1::sender::~sender() {
     disconnect_all();
 }
 
-void project::sender::connect_all(std::string _host, int _reciver_port) {
+void project1::sender::connect_all(std::string _host, int _reciver_port) {
     host = _host;
     reciver_port = _reciver_port;
 
@@ -33,7 +33,7 @@ void project::sender::connect_all(std::string _host, int _reciver_port) {
     }
 }
 
-void project::sender::connect(int *sockfd, int port) {
+void project1::sender::connect(int *sockfd, int port) {
     struct sockaddr_in servaddr;
     struct hostent* server;
 
@@ -49,18 +49,18 @@ void project::sender::connect(int *sockfd, int port) {
         throw "can't connect to host";
 }
 
-void project::sender::disconnect_all() {
+void project1::sender::disconnect_all() {
     for(auto socket : sockets)
         disconnect(socket);
     if(is_msg_socket)
         disconnect(mess_sock);
 }
 
-void project::sender::disconnect(int sockfd) {
+void project1::sender::disconnect(int sockfd) {
     close(sockfd);
 }
 
-void project::sender::send_short_msg(std::string msg) {
+void project1::sender::send_short_msg(std::string msg) {
     int sended;
     char ok;
     if((sended = write(mess_sock, &counter_of_short_msg, 2)) < 0)
@@ -71,47 +71,47 @@ void project::sender::send_short_msg(std::string msg) {
     recv(mess_sock, &ok, 1, 0);
 }
 
-class synchronized_file_reader {
-    private:
-        std::string path;
-        std::ifstream file;
-        int f_length;
-        std::mutex mutex_to_read;
-    public:
-        synchronized_file_reader(const std::string& _path) : path(_path) {
-            file.open(path);
-            file.seekg(0, file.end);
-            f_length = file.tellg();
-            file.seekg(0, file.beg);
-        }
 
-        int read(int from_position, std::string buff) {
-            mutex_to_read.lock();
-            file.seekg(from_position);
-    //        file.read(buff.c_str, MESS_SIZE);
-            mutex_to_read.unlock();
-            return f_length - from_position;
-        }
-
-        int get_file_lenght() {
-            return f_length;
-        }
-};
-
-void send_peace_of_file(int socket, int start_p, int step, synchronized_file_reader* reader) {
-    
+void send_piece_of_file(int socket, int start_p, int step, project1::synchronized_file_reader* reader, int* sending_file_flag_ptr) {
+    char s[MESS_SIZE];
+    int readen_bytes;
+    int p;
+    char ok; //response of getting
+    std::cout << start_p << " " << step;
+    for(p = start_p * MESS_SIZE; p < start_p* MESS_SIZE + step* MESS_SIZE ;p += MESS_SIZE) {
+        readen_bytes = (*reader).read(p, s);
+        if(readen_bytes <= 0) break;
+        std::cout << s;
+        fflush(stdout);
+        send(socket, &p, 4, 0);
+        send(socket, s, readen_bytes, 0);
+        recv(socket, &ok, 1, 0);
+    }
+    p = -1;
+    send(socket, &p, 4, 0);
+    *sending_file_flag_ptr--;
 }
 
-void project::sender::send_file(std::string path) {
-    synchronized_file_reader reader(path);
-    int step_for_one_socket = ceil(ceil(reader.get_file_lenght() / MESS_SIZE) / num_sockets);
+void project1::sender::send_file(char* path) {
+    if(sending_file_flag != 0)
+        throw "another file sending";
+    char ok;
+    sending_file_flag = num_sockets;
+    reader.init(path);
+    //sending name_of_file
+
+    send(sockets[0], path, strlen(path), 0);
+    recv(sockets[0], &ok, 1, 0);
+    //
+
+    int step_for_one_socket = int(int(reader.get_file_lenght() / MESS_SIZE + 1) / num_sockets + 1);
     synchronized_file_reader* reader_ptr = &reader;
-    //std::function<void(int, int, int, synchronized_file_reader&)> peace_sender;
-    //peace_sender = send_peace_of_file;
+    int* sending_file_flag_ptr = &sending_file_flag;
+    std::cout << step_for_one_socket;
     for(int i = 0; i < num_sockets; i++) {
         int s = sockets[i];
-        fut[i] = std::async(std::launch::async, [s, i, step_for_one_socket, reader_ptr](){
-                send_peace_of_file(s, i*step_for_one_socket, step_for_one_socket, reader_ptr);
+        fut[i] = std::async(std::launch::async, [s, i, step_for_one_socket, reader_ptr, sending_file_flag_ptr](){
+                send_piece_of_file(s, i*step_for_one_socket, step_for_one_socket, reader_ptr, sending_file_flag_ptr);
             });
     }
 }
