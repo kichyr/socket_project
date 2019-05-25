@@ -1,20 +1,17 @@
-socket, &next, 1, 0
-Things work fine in most of the cases. The future times out & is reported ready in many cases. But, Strange behavior I am observing is that in some cases the UI hangs because my_future_result when going out of scope hangs. I confirmed this by repeating the call to my_future_result.get() which never returns if called just before exiting the method.
+socket, &next, 1, 000 
+Things work fine in most of the cases. The future times out & is reported ready in many cases. But, Strang behavior I am observing is that in some cases the UI hangs because my_future_result when going out of scope hangs. I confirmed this by repeating the call to my_future_result.get() which never returns if called just before exiting the method.
 
-How can I get around this ? Is there some way I cancel or delete or terminate the the theture ?
+How can I get around this ? Is there some way I cancel or delete or terminate the std::future ?
 
 c++ c++11 stdasync std-future
 shareimprove this question
 edited Feb 16 '17 at 17:30
 asked Feb 16 '17 at 17:04
 
-Game_Of_Threads
-1,70821652
-1
-That said, I'd recommend you to create a MVCE. – tambre Feb 16 '17 at 17:18
+Game_Ofe_Ofe_Ofe_Ofe_Ofe_Ofe_Ofe_Ofe_Of I'd recommend you to create a MVCE. – tambre Feb 16 '17 at 17:18
 Is there a chance your future is not valid prior to the wait call? – Mikel F Feb 16 '17 at 17:21
-Async tasks block until the task is finished, upon destruction. It's like running wait when going out of scope. – pepper_chicchicchic '17 at 17:27 
-it is really strange behavior with the future & async. this is only a pseudocode btw. The call to PotentiallyLongRunningActivity in my actual source code in is trying to connect to a server using boost::asio. but as You would understand, I cannot give put the whole source code here on stactOverflow. But as per my understanding, the future should cancel the call after time out & should not hang after that. – Game_Of_Threads Feb Feb Feb Feb :28
+Async tasks block until the task is finished, upon destruction. It's like running wait when going out of scope. – pepper_chico Feb 16 '17 at 17:27 
+it is really strange behavior with the future & async. this is only a pseudocode btw. The call to PotentiallyLongRunningActivity in my actual source code in is trying to connect to a server using boost::asio. but as You would understand, I cannot give put put put put put put put put put put put put  But as per my understanding, the future should cancel the call after time out & should not hang after that. – Game_Of_Threads Feb 16 '17 at 17:28
 Based on my reading of the docs on cppreference, hitting the timeout will not kill the task. – Mikel F Feb 16 '17 at 17:31
 show 3 more comments
 4 Answers

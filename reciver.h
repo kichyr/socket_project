@@ -20,7 +20,7 @@
 #include <mutex>
 
 //TO FIX
-#define NUM_THREADS 5
+#define NUM_THREADS 40
 #define MESS_SIZE 4096
 
 class synchronized_file_writer {
@@ -89,7 +89,7 @@ class reciver {
 		unsigned int listeningPort;
 		bool started;
 		bool stopSock;	
-		std::mutex mutex_to_send_file_name;
+		std::mutex mutex_to_recive_file;
 
 		//0 - короткое сообщение, 1 - файл
 		friend void recive_short_mess(int socket, reciver* r);

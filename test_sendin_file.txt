@@ -1,5 +1,5 @@
-socket, &next, 1, 0
-Things work fine in most of the cases. The future times out & is reported ready in many cases. But, Strange behavior I am observing is that in some cases the UI hangs because my_future_result when going out of scope hangs. I confirmed this by repeating the call to my_future_result.get() which never returns if called just before exiting the method.
+socket, &next, 1, 000 
+Things work fine in most of the cases. The future times out & is reported ready in many cases. But, Strang behavior I am observing is that in some cases the UI hangs because my_future_result when going out of scope hangs. I confirmed this by repeating the call to my_future_result.get() which never returns if called just before exiting the method.
 
 How can I get around this ? Is there some way I cancel or delete or terminate the std::future ?
 

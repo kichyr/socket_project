@@ -30,6 +30,7 @@ void project1::sender::connect_all(std::string _host, int _reciver_port) {
         connect(&sockets[i], reciver_port);
         if((sended = write(sockets[i], &type_msg, 1)) < 0)
             throw "can't send type of msg";
+        write(sockets[i], &i, 4);
     }
 }
 
@@ -48,6 +49,8 @@ void project1::sender::connect(int *sockfd, int port) {
     if(::connect(*sockfd, (struct sockaddr*) &servaddr, sizeof(servaddr)) < 0)
         throw "can't connect to host";
 }
+
+
 
 void project1::sender::disconnect_all() {
     for(auto socket : sockets)
@@ -77,11 +80,11 @@ void send_piece_of_file(int socket, int start_p, int step, project1::synchronize
     int readen_bytes;
     int p;
     char ok; //response of getting
-    std::cout << start_p << " " << step;
-    for(p = start_p * MESS_SIZE; p < start_p* MESS_SIZE + step* MESS_SIZE ;p += MESS_SIZE) {
+    std::cout << '(' << start_p << ' ' << start_p + (step)  << std::endl;
+    std::cout << (*reader).get_file_lenght() << std::endl;
+    for(p = start_p; p <= start_p + (step)  ;p += MESS_SIZE) {
         readen_bytes = (*reader).read(p, s);
         if(readen_bytes <= 0) break;
-        std::cout << s;
         fflush(stdout);
         send(socket, &p, 4, 0);
         send(socket, s, readen_bytes, 0);
@@ -107,11 +110,11 @@ void project1::sender::send_file(char* path) {
     int step_for_one_socket = int(int(reader.get_file_lenght() / MESS_SIZE + 1) / num_sockets + 1);
     synchronized_file_reader* reader_ptr = &reader;
     int* sending_file_flag_ptr = &sending_file_flag;
-    std::cout << step_for_one_socket;
+    std::cout << step_for_one_socket << std::endl;
     for(int i = 0; i < num_sockets; i++) {
         int s = sockets[i];
         fut[i] = std::async(std::launch::async, [s, i, step_for_one_socket, reader_ptr, sending_file_flag_ptr](){
-                send_piece_of_file(s, i*step_for_one_socket, step_for_one_socket, reader_ptr, sending_file_flag_ptr);
+                send_piece_of_file(s, MESS_SIZE*i*step_for_one_socket+i, MESS_SIZE*step_for_one_socket, reader_ptr, sending_file_flag_ptr);
             });
     }
 }

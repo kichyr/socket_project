@@ -78,35 +78,36 @@ void recive_file(int socket, reciver* r){
     int p, recived; //position
     char next = 1;
     int state = 0;
+    int number;
+    recv(socket, &number, 4, 0);
     while(r->isAlive()) {
         //принимаем название файла
-        if(r->reciving_file_flag == 0)
-            state = 0;
-        if(r->reciving_file_flag == 0) {
-            //r->mutex_to_send_file_name.lock();
-                if(r->reciving_file_flag == 0) {
-                recived = recv(socket, msg, 100, 0);
-                r->writer.init_new_file(msg);
-                r->reciving_file_flag++;
-                write(socket, &next, 1);
-                //std::cout << "ok";
-            }
-            //r->mutex_to_send_file_name.unlock();
-        }
-        if(r->reciving_file_flag > 0 && state == 0)
+        if(r->reciving_file_flag == 0 && state == 0 && number == 0) {
+            recived = recv(socket, msg, 100, 0);
+            r->writer.init_new_file(msg);
+            write(socket, &next, 1);
+            r->reciving_file_flag++;
             state = 1;
+        }
+        if(r->reciving_file_flag > 0 && state == 0) {
+            state = 1;
+            r->reciving_file_flag++;
+        }
+        if(r->reciving_file_flag == 0 && state == 2)
+            state = 0;
         //принимаем куски файлов
         else if(state == 1){
             recv(socket, &p, 4, 0);
-            std::cout << p << std::endl;
             if(p != -1) {
-                recived = recv(socket, msg, 100, 0);
+                r->mutex_to_recive_file.lock();
+                recived = recv(socket, msg, 4, 0);
                 write(socket, &next, 1);
-                std::cout << msg;
                 r->writer.write(p, msg, recived);
+                r->mutex_to_recive_file.unlock();
             }
             else {
                 state = 2;
+                r->reciving_file_flag--;
             }
         }
     }

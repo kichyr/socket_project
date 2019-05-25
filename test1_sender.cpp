@@ -10,7 +10,7 @@ void handler(int a){
 }
 int main() {
     
-    send1.init(true, 4);
+    send1.init(true, 3);
     try{
     send1.connect_all("0.0.0.0", 50063);
    /*  send1.send_short_msg("fuck you");
@@ -23,6 +23,9 @@ int main() {
     }
     char* path = "/home/kichyr/infa_4sem/socket_sender/test_sendin_file.txt";
     send1.send_file(path);
+    char* path2 = "/home/kichyr/infa_4sem/socket_sender/test1_sender.cpp";
+    //while(sender.)
+    //send1.send_file(path2);
     while(1){}
     //send1.send_short_msg("no fuck you");
     return 0;

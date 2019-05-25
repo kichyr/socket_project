@@ -44,7 +44,7 @@ class synchronized_file_reader {
             if(from_position >= f_length) return 0;
             mutex_to_read.lock();
             int num_bytes_to_read = std::min(MESS_SIZE, f_length - from_position);
-            file.seekg(from_position, file.beg);
+            file.seekg(from_position);
             file.read(buff, MESS_SIZE);
             file.seekg(0);
             mutex_to_read.unlock();
