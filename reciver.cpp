@@ -99,8 +99,9 @@ void recive_file(int socket, reciver* r){
         else if(state == 1){
             recv(socket, &p, 4, 0);
             if(p != -1) {
+                std::cout << number << std::endl;
                 r->mutex_to_recive_file.lock();
-                recived = recv(socket, msg, 4, 0);
+                recived = recv(socket, msg, RCV_PARTS_SIZE, 0);
                 write(socket, &next, 1);
                 r->writer.write(p, msg, recived);
                 r->mutex_to_recive_file.unlock();

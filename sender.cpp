@@ -82,8 +82,9 @@ void send_piece_of_file(int socket, int start_p, int step, project1::synchronize
     char ok; //response of getting
     std::cout << '(' << start_p << ' ' << start_p + (step)  << std::endl;
     std::cout << (*reader).get_file_lenght() << std::endl;
-    for(p = start_p; p <= start_p + (step)  ;p += MESS_SIZE) {
+    for(p = start_p; p <= std::min(start_p + (step), reader->get_file_lenght() + (step));p += MESS_SIZE) {
         readen_bytes = (*reader).read(p, s);
+        std::cout << ".///" << readen_bytes << "////" <<std::endl;
         if(readen_bytes <= 0) break;
         fflush(stdout);
         send(socket, &p, 4, 0);
